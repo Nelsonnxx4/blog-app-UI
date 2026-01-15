@@ -7,21 +7,28 @@ import type { BlogFormData } from "../types/blogType";
 import { ReusableInput } from "../components/ui/ReusableInput";
 import { ReusableButton } from "../components/ui/ReusableButton";
 import { Select, SelectItem } from "@heroui/react";
-// import { Textarea } from "@heroui/react";
+import { authHelpers } from "../utils/api";
 
 const CreateBlogPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
-  const blogId = parseInt(id || "0");
   const navigate = useNavigate();
+  const currentUser = authHelpers.getUser();
 
-  const { data: existingBlog, isLoading: isLoadingBlog } = useBlog(blogId);
+  // Check authentication
+  useEffect(() => {
+    if (!authHelpers.isAuthenticated()) {
+      navigate("/auth/login");
+    }
+  }, [navigate]);
+
+  const { data: existingBlog, isLoading: isLoadingBlog } = useBlog(id || "");
   const createBlogMutation = useCreateBlog();
   const updateBlogMutation = useUpdateBlog();
 
   const [formData, setFormData] = useState<BlogFormData>({
     title: "",
-    author: "",
+    author: currentUser?.name || "",
     content: "",
     category: "Technology",
   });
@@ -31,9 +38,7 @@ const CreateBlogPage: React.FC = () => {
     "Lifestyle",
     "Programming",
     "Design",
-    "Business",
-    "Health",
-    "Travel",
+    "Other",
   ];
 
   useEffect(() => {
@@ -50,19 +55,27 @@ const CreateBlogPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isEditing) {
+    if (isEditing && id) {
       updateBlogMutation.mutate(
-        { id: blogId, data: formData },
+        { id, data: formData },
         {
-          onSuccess: () => {
-            navigate(`/blog/${blogId}`);
+          onSuccess: (data) => {
+            navigate(`/blogs/${data._id}`);
+          },
+          onError: (error: any) => {
+            alert(
+              error.response?.data?.message || "Failed to update blog post"
+            );
           },
         }
       );
     } else {
       createBlogMutation.mutate(formData, {
         onSuccess: () => {
-          navigate("/home");
+          navigate("/blogs");
+        },
+        onError: (error: any) => {
+          alert(error.response?.data?.message || "Failed to create blog post");
         },
       });
     }
@@ -97,12 +110,10 @@ const CreateBlogPage: React.FC = () => {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-md py-8 px-3 border border-gray-100"
         >
-          {/* Title */}
-          <div>
+          <div className="space-y-4">
+            {/* Title */}
             <div>
-              <label className="text-sm font-medium text-gray-700 ">
-                Title
-              </label>
+              <label className="text-sm font-medium text-gray-700">Title</label>
               <ReusableInput
                 type="text"
                 required
@@ -119,7 +130,7 @@ const CreateBlogPage: React.FC = () => {
             <div>
               <label
                 htmlFor="author"
-                className="text-sm font-medium text-gray-700 "
+                className="text-sm font-medium text-gray-700"
               >
                 Author
               </label>
@@ -139,22 +150,24 @@ const CreateBlogPage: React.FC = () => {
             <div>
               <label
                 htmlFor="category"
-                className=" text-sm font-medium text-gray-700 "
+                className="text-sm font-medium text-gray-700"
               >
                 Category
               </label>
               <Select
                 required
                 placeholder="Select a category"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, category: e.target.value }))
-                }
+                selectedKeys={[formData.category]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData((prev) => ({ ...prev, category: selected }));
+                }}
                 className="w-full border border-gray-200 rounded-md bg-gray-50/50 focus:outline-none transition-all text-gray-600"
               >
                 {categories.map((category) => (
                   <SelectItem
                     key={category}
+                    value={category}
                     className="bg-gray-50 shadow-xl text-gray-700 font-medium"
                   >
                     {category}
@@ -167,25 +180,24 @@ const CreateBlogPage: React.FC = () => {
             <div>
               <label
                 htmlFor="content"
-                className=" text-sm font-medium text-gray-700 "
+                className="text-sm font-medium text-gray-700"
               >
                 Content
               </label>
-
               <textarea
-                rows={3}
+                rows={8}
                 required
-                placeholder="write your story"
+                placeholder="Write your story..."
                 value={formData.content}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, content: e.target.value }))
                 }
-                className="w-full text-gray-700 border border-gray-300 p-2 focus:outline-0 rounded-md transition-all "
+                className="w-full text-gray-700 border border-gray-300 p-2 focus:outline-0 rounded-md transition-all"
               />
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-6 ">
+            <div className="flex justify-end pt-6">
               <ReusableButton
                 type="submit"
                 disabled={isLoading}

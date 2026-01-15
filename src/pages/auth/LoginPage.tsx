@@ -1,41 +1,93 @@
 import { Button, Input } from "@heroui/react";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useLogin } from "../../hooks/useAuth";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const navigate = useNavigate();
+
+  const loginMutation = useLogin();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    fetch("http://localhost:5000", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: { "Content-Type": "application/json" },
-    });
+
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          navigate("/blogs");
+        },
+        onError: (error: any) => {
+          alert(
+            error.response?.data?.message || "Login failed. Please try again."
+          );
+        },
+      }
+    );
   };
 
   return (
-    <main>
-      <form onSubmit={handleSubmit}>
-        <h1>Welcome back</h1>
-        <Input
-          label="Email"
-          type="email"
-          placeholder="joedoe@gmail.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+    <main className="min-h-screen bg-gradient-to-b from-stone-100 to-stone-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
+        >
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Welcome Back
+          </h1>
 
-        <Input
-          label="Password"
-          type="password"
-          placeholder="******"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <div className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              placeholder="joedoe@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              variant="bordered"
+              classNames={{
+                input: "text-gray-700",
+                label: "text-gray-600",
+              }}
+            />
 
-        <Button type="submit">Login</Button>
-      </form>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="******"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              variant="bordered"
+              classNames={{
+                input: "text-gray-700",
+                label: "text-gray-600",
+              }}
+            />
+
+            <Button
+              type="submit"
+              className="w-full bg-orange-500 text-white font-semibold"
+              isLoading={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Logging in..." : "Login"}
+            </Button>
+          </div>
+
+          <p className="text-center text-gray-600 mt-6">
+            Don't have an account?{" "}
+            <Link
+              to="/auth/signup"
+              className="text-orange-600 hover:text-orange-700 font-medium"
+            >
+              Sign up
+            </Link>
+          </p>
+        </form>
+      </div>
     </main>
   );
 };
