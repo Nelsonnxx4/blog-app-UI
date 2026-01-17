@@ -148,7 +148,7 @@ const BlogsPage: React.FC = () => {
                       SortField,
                       SortOrder
                     ];
-                    setSortField(field === "date" ? "createdAt" : field);
+                    setSortField(field);
                     setSortOrder(order);
                   }}
                   className="w-full pl-8 pr-2 py-2 border border-gray-200 rounded-md appearance-none bg-white text-gray-600 text-sm"

@@ -167,7 +167,6 @@ const CreateBlogPage: React.FC = () => {
                 {categories.map((category) => (
                   <SelectItem
                     key={category}
-                    value={category}
                     className="bg-gray-50 shadow-xl text-gray-700 font-medium"
                   >
                     {category}

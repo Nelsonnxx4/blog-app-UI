@@ -34,29 +34,32 @@ const SignupPage: React.FC = () => {
       <div className="w-full max-w-md">
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
+          className=" bg-white rounded-2xl shadow-lg px-1 py-6 md:p-8 border border-gray-100"
         >
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            Create Account
+            Welcome Back
           </h1>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Input
               label="Name"
+              labelPlacement="outside-top"
               type="text"
-              placeholder="Nelson"
+              placeholder="joedoe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               variant="bordered"
               classNames={{
-                input: "text-gray-700",
-                label: "text-gray-600",
+                input:
+                  "p-2 text-gray-700 bg-gray-50 focus:bg-gray-100 border-gray-600 outline-gray-500 ",
+                label: "text-gray-700 ml-4",
               }}
             />
 
             <Input
               label="Email"
+              labelPlacement="outside-top"
               type="email"
               placeholder="joedoe@gmail.com"
               value={email}
@@ -64,13 +67,15 @@ const SignupPage: React.FC = () => {
               required
               variant="bordered"
               classNames={{
-                input: "text-gray-700",
-                label: "text-gray-600",
+                input:
+                  "p-2 text-gray-700 bg-gray-50 focus:bg-gray-100 border-gray-600 outline-gray-500 ",
+                label: "text-gray-700 ml-4",
               }}
             />
 
             <Input
               label="Password"
+              labelPlacement="outside-top"
               type="password"
               placeholder="******"
               value={password}
@@ -78,22 +83,25 @@ const SignupPage: React.FC = () => {
               required
               variant="bordered"
               classNames={{
-                input: "text-gray-700",
-                label: "text-gray-600",
+                input:
+                  "p-2 rounded-md text-gray-700 bg-gray-50 focus:bg-gray-100 border-gray-600 outline-gray-500",
+                label: "text-gray-600 ml-4",
               }}
             />
 
-            <Button
-              type="submit"
-              className="w-full bg-orange-500 text-white font-semibold"
-              isLoading={signupMutation.isPending}
-            >
-              {signupMutation.isPending ? "Creating account..." : "Sign Up"}
-            </Button>
+            <div className="flex justify-center items-center">
+              <Button
+                type="submit"
+                className="px-12 rounded-md bg-orange-500 text-white font-semibold"
+                isLoading={signupMutation.isPending}
+              >
+                {signupMutation.isPending ? "Signing up..." : "Signup"}
+              </Button>
+            </div>
           </div>
 
           <p className="text-center text-gray-600 mt-6">
-            Already have an account?{" "}
+            Don't have an account?{" "}
             <Link
               to="/auth/login"
               className="text-orange-600 hover:text-orange-700 font-medium"
