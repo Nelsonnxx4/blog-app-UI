@@ -145,10 +145,12 @@ const BlogsPage: React.FC = () => {
                   value={`${sortField}-${sortOrder}`}
                   onChange={(e) => {
                     const [field, order] = e.target.value.split("-") as [
-                      SortField,
+                      string,
                       SortOrder
                     ];
-                    setSortField(field);
+                    setSortField(
+                      field === "date" ? "createdAt" : (field as SortField)
+                    );
                     setSortOrder(order);
                   }}
                   className="w-full pl-8 pr-2 py-2 border border-gray-200 rounded-md appearance-none bg-white text-gray-600 text-sm"

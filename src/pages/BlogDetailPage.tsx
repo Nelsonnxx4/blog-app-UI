@@ -3,14 +3,22 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, User, Tag, Edit, Trash2 } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useBlog, useDeleteBlog } from "../hooks/useBlogs";
+import { authHelpers } from "../utils/api";
 
 const BlogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const blogId = parseInt(id || "0");
+  const blogId = id || ""; // ✅ Fixed - keep as string
 
   const { data: blog, isLoading, error } = useBlog(blogId);
   const deleteBlogMutation = useDeleteBlog();
+
+  const currentUser = authHelpers.getUser();
+  const isAuthor =
+    currentUser &&
+    (typeof blog?.userId === "string"
+      ? blog.userId === currentUser.id
+      : blog?.userId._id === currentUser.id);
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
@@ -26,10 +34,13 @@ const BlogDetailPage: React.FC = () => {
   if (error || !blog)
     return <div className="text-center py-12 text-red-600">Blog not found</div>;
 
+  // Get author name
+  const authorName =
+    typeof blog.userId === "object" ? blog.userId.name : blog.author;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-100 to-stone-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Back Button */}
         <Link
           to="/blogs"
           className="inline-flex items-center text-orange-600 hover:text-orange-800 mb-6 transition-colors"
@@ -38,7 +49,6 @@ const BlogDetailPage: React.FC = () => {
           Back to Blogs
         </Link>
 
-        {/* Blog Content */}
         <article className="bg-white rounded-xl shadow-lg p-3 border border-gray-200">
           <header className="border-b border-gray-200 pb-6 mb-6">
             <h1 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -46,15 +56,15 @@ const BlogDetailPage: React.FC = () => {
             </h1>
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-gray-600">
-              <div className="flex flex-wrap items-center ">
+              <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center">
                   <User size={20} className="mr-2 text-gray-500" />
-                  <span>{blog.author}</span>
+                  <span>{authorName}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar size={20} className="mr-2 text-gray-500" />
                   <span>
-                    {new Date(blog.date).toLocaleDateString("en-US", {
+                    {new Date(blog.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -63,22 +73,24 @@ const BlogDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Link
-                  to={`/edit/${blog.id}`}
-                  className="flex items-center text-gray-500 hover:text-blue-800 transition-colors"
-                >
-                  <Edit size={18} className="mr-1" />
-                  Edit
-                </Link>
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center text-red-600 hover:text-red-800 transition-colors"
-                >
-                  <Trash2 size={18} className="mr-1" />
-                  Delete
-                </button>
-              </div>
+              {isAuthor && (
+                <div className="flex items-center space-x-4">
+                  <Link
+                    to={`/blogs/edit/${blog._id}`}
+                    className="flex items-center text-gray-500 hover:text-blue-800 transition-colors"
+                  >
+                    <Edit size={18} className="mr-1" />
+                    Edit
+                  </Link>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center text-red-600 hover:text-red-800 transition-colors"
+                  >
+                    <Trash2 size={18} className="mr-1" />
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center mt-4">
@@ -89,8 +101,8 @@ const BlogDetailPage: React.FC = () => {
             </div>
           </header>
 
-          <div className="">
-            <p className="text-gray-700 leading-6 text-lg  whitespace-pre-line">
+          <div>
+            <p className="text-gray-700 leading-6 text-lg whitespace-pre-line">
               {blog.content}
             </p>
           </div>
