@@ -21,6 +21,7 @@ const SignupPage: React.FC = () => {
           navigate("/blogs");
         },
         onError: (error: any) => {
+          console.log(error.response.data);
           alert(
             error.response?.data?.message || "Signup failed. Please try again."
           );

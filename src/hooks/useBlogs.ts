@@ -14,7 +14,7 @@ export const useBlogs = (limit?: number) => {
     queryFn: async (): Promise<Blog[]> => {
       const params = limit ? { limit: limit.toString() } : {};
       const response = await api.get<BlogsApiResponse>("/blogs", { params });
-      return response.data.data; // Extract data from response wrapper
+      return response.data.data;
     },
   });
 };
@@ -28,17 +28,6 @@ export const useBlog = (id: string) => {
       return response.data.data;
     },
     enabled: !!id,
-  });
-};
-
-// GET user's blogs
-export const useMyBlogs = () => {
-  return useQuery({
-    queryKey: ["myBlogs"],
-    queryFn: async (): Promise<Blog[]> => {
-      const response = await api.get<BlogsApiResponse>("/blogs/user/my-blogs");
-      return response.data.data;
-    },
   });
 };
 
